@@ -19,9 +19,9 @@ public class EmployeeDto {
     private String email;
     @NotBlank(message = "role can not be empty")
     @ValueOfEnum(enumClass= EmployeeRole.class,
-            message = "role must be one" +
-                    "of \"DIRECTOR\", \"MANAGER\", "+
-                    "\"SENIOR_STAFF\", \"JUNIOR_STAFF\"")
+            message = "role must be one " +
+                    "of 'DIRECTOR', 'MANAGER', "+
+                    "'SENIOR_STAFF', 'JUNIOR_STAFF'")
     private String role;
 
     @JsonProperty("department_id")

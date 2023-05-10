@@ -22,7 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -97,6 +100,34 @@ class EmployeeControllerTest {
 
         mvc.perform(doRequest)
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void createEmployeeValidationFailed() throws Exception {
+        Department oneDepartment = Department.builder()
+                .id("#department-id")
+                .build();
+
+        Employee oneEmployee = Employee.builder()
+                .email("test@mail.com")
+                .role(EmployeeRole.DIRECTOR)
+                .id("testID")
+                .department(oneDepartment)
+                .build();
+
+        when(departmentService.getDepartmentById("#department-id")).thenReturn(Optional.of(oneDepartment));
+
+        RequestBuilder doRequest = MockMvcRequestBuilders
+                .post("/api/v1/employees")
+                .content(asJsonString(employeeMapper.toEmployeeDto(oneEmployee)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON);
+
+        mvc.perform(doRequest)
+                .andExpect(jsonPath("$.errors[0]", containsString("name can not be empty")))
+                .andExpect(jsonPath("$.errors", hasSize(1)))
+                .andExpect(jsonPath("$.message").value("Invalid request"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

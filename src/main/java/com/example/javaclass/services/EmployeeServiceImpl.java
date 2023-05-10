@@ -1,7 +1,7 @@
 package com.example.javaclass.services;
 
 import com.example.javaclass.entity.Employee;
-import com.example.javaclass.repositories.EmployeeRepositories;
+import com.example.javaclass.repositories.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,31 +11,31 @@ import java.util.List;
 public class EmployeeServiceImpl implements EmployeeService {
 
 
-    private EmployeeRepositories employeeRepositories;
+    private EmployeeRepository employeeRepository;
 
     @Autowired
-    public EmployeeServiceImpl(EmployeeRepositories employeeRepositories) {
-        this.employeeRepositories = employeeRepositories;
+    public EmployeeServiceImpl(EmployeeRepository employeeRepository) {
+        this.employeeRepository = employeeRepository;
     }
 
 
     @Override
     public void save(Employee employee) {
-        employeeRepositories.save(employee);
+        employeeRepository.save(employee);
     }
 
     @Override
     public void update(Employee employee) {
-        employeeRepositories.save(employee);
+        employeeRepository.save(employee);
     }
 
     @Override
     public List<Employee> getAllEmployee() {
-        return employeeRepositories.findAll();
+        return employeeRepository.findAll();
     }
 
     @Override
     public void deleteEmployee(Employee employee) {
-        employeeRepositories.delete(employee);
+        employeeRepository.delete(employee);
     }
 }
