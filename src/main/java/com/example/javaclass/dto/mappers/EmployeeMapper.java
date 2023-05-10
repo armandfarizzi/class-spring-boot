@@ -11,6 +11,6 @@ import org.mapstruct.factory.Mappers;
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface EmployeeMapper {
     EmployeeMapper INSTANCE = Mappers.getMapper(EmployeeMapper.class);
-    Employee employeeDtoToEmployee(EmployeeDto employeeDto);
-    EmployeeDto employeeToEmployeeDto(Employee employee);
+    Employee toEmployee(EmployeeDto employeeDto);
+    EmployeeDto toEmployeeDto(Employee employee);
 }

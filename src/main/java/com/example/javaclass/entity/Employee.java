@@ -38,4 +38,11 @@ public class Employee {
     @OneToOne
     @JoinColumn(name = "department_id", referencedColumnName = "id")
     private Department department;
+
+    public String getDepartmentId() {
+        if (this.department == null) {
+            return null;
+        }
+        return this.department.getId();
+    }
 }

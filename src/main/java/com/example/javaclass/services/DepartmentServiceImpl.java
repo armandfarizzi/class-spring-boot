@@ -15,6 +15,11 @@ public class DepartmentServiceImpl implements  DepartmentService{
     private DepartmentRepository departmentRepository;
 
     @Override
+    public Optional<Department> getDepartmentByIdWithEmployee(String id) {
+        return departmentRepository.findEagerById(id);
+    }
+
+    @Override
     public Optional<Department> getDepartmentById(String id) {
         return departmentRepository.findById(id);
     }

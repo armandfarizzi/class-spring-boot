@@ -2,6 +2,7 @@ package com.example.javaclass.controllers;
 
 
 import com.example.javaclass.dto.DepartmentDto;
+import com.example.javaclass.dto.DepartmentWithEmployeeDto;
 import com.example.javaclass.dto.mappers.DepartmentMapper;
 import com.example.javaclass.entity.Department;
 import com.example.javaclass.services.DepartmentService;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -39,5 +41,14 @@ public class DepartmentController {
         return ResponseEntity.ok("ok");
     }
 
-
+    @GetMapping("/{id}")
+    public ResponseEntity<DepartmentWithEmployeeDto> getDepartmentEmployee(
+            @PathVariable
+            String
+            id
+    ){
+        Optional<Department> department = departmentService.getDepartmentByIdWithEmployee(id);
+        DepartmentWithEmployeeDto departmentWithEmployeeDto = departmentMapper.toDepartmentWithEmployeeDto(department.get());
+        return ResponseEntity.ok(departmentWithEmployeeDto);
+    }
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DepartmentService {
+    Optional<Department> getDepartmentByIdWithEmployee(String id);
 
     Optional<Department> getDepartmentById(String id);
     List<Department> getAllDepartment();
