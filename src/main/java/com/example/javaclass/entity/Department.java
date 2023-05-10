@@ -10,22 +10,24 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "employee")
-public class Employee {
+@Table(name = "department")
+public class Department {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    private String name;
-    private String email;
 
-    @Enumerated(EnumType.STRING)
-    private EmployeeRole role;
+    private String departmentName;
+    private String location;
+    private long budget;
+
 
     @Column(name = "created_date", nullable = false, updatable = false)
     @CreatedDate
@@ -35,7 +37,6 @@ public class Employee {
     @LastModifiedDate
     private long modifiedDate;
 
-    @OneToOne
-    @JoinColumn(name = "department_id", referencedColumnName = "id")
-    private Department department;
+    @OneToMany(mappedBy = "department")
+    private List<Employee> employeeList;
 }
