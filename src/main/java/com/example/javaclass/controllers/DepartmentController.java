@@ -3,8 +3,7 @@ package com.example.javaclass.controllers;
 
 import com.example.javaclass.dto.DepartmentDto;
 import com.example.javaclass.dto.DepartmentWithEmployeeDto;
-import com.example.javaclass.dto.mappers.DepartmentMapper;
-import com.example.javaclass.entity.Department;
+import com.example.javaclass.exception.CustomException;
 import com.example.javaclass.services.DepartmentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,42 +12,38 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/department")
 public class DepartmentController {
     @Autowired
     private DepartmentService departmentService;
-    private DepartmentMapper departmentMapper = DepartmentMapper.INSTANCE;
 
     @GetMapping("")
     public ResponseEntity<List<DepartmentDto>> getAllDepartment() {
-        List<Department> departmentList = departmentService.getAllDepartment();
-        List<DepartmentDto> departmentDtoList = departmentList.stream().map(department -> departmentMapper.toDepartmentDto(department)).collect(Collectors.toList());
+        List<DepartmentDto> departmentDtoList = departmentService.getAllDepartment();
         return ResponseEntity.ok(departmentDtoList);
     }
 
     @PostMapping("")
     public ResponseEntity<String> createDepartment(
-            @Valid
-            @RequestBody
-            DepartmentDto
-            departmentDto
+            @Valid @RequestBody
+            DepartmentDto departmentDto
     ){
-        Department department = departmentMapper.toDepartment(departmentDto);
-        departmentService.save(department);
+        departmentService.save(departmentDto);
         return ResponseEntity.ok("ok");
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DepartmentWithEmployeeDto> getDepartmentEmployee(
+    public ResponseEntity<Object> getDepartmentEmployee(
             @PathVariable
-            String
-            id
+            String id
     ){
-        Optional<Department> department = departmentService.getDepartmentByIdWithEmployee(id);
-        DepartmentWithEmployeeDto departmentWithEmployeeDto = departmentMapper.toDepartmentWithEmployeeDto(department.get());
-        return ResponseEntity.ok(departmentWithEmployeeDto);
+        Optional<DepartmentWithEmployeeDto> departmentWithEmployeeDto = departmentService.getDepartmentByIdWithEmployee(id);
+        if (departmentWithEmployeeDto.isEmpty()) {
+            throw new CustomException(400, "bad request", "department is not found");
+        }
+
+        return ResponseEntity.ok(departmentWithEmployeeDto.get());
     }
 }

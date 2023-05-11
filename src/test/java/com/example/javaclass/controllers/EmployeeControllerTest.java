@@ -1,12 +1,11 @@
 package com.example.javaclass.controllers;
 
+import com.example.javaclass.dto.DepartmentDto;
+import com.example.javaclass.dto.EmployeeDto;
 import com.example.javaclass.dto.mappers.EmployeeMapper;
-import com.example.javaclass.entity.Department;
-import com.example.javaclass.entity.Employee;
 import com.example.javaclass.entity.EmployeeRole;
 import com.example.javaclass.services.DepartmentService;
 import com.example.javaclass.services.EmployeeService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,19 +45,12 @@ class EmployeeControllerTest {
 
     private EmployeeMapper employeeMapper = EmployeeMapper.INSTANCE;
 
-    private String asJsonString(final Object obj) {
-        try {
-            return new ObjectMapper().writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Test
     void getAllEmployee() throws Exception {
-        List<Employee> oneEmployee = new ArrayList<Employee>(){
+        List<EmployeeDto> oneEmployee = new ArrayList<EmployeeDto>(){
             {
-                add(Employee.builder().
+                add(EmployeeDto.builder().
                         name("test")
                             .email("test@mail.com")
                             .id("testID")
@@ -78,14 +70,14 @@ class EmployeeControllerTest {
 
     @Test
     void createEmployee() throws Exception {
-        Department oneDepartment = Department.builder()
+        DepartmentDto oneDepartment = DepartmentDto.builder()
                 .id("#department-id")
                 .build();
 
-        Employee oneEmployee = Employee.builder().
+        EmployeeDto oneEmployee = EmployeeDto.builder().
                         name("test")
                         .email("test@mail.com")
-                        .role(EmployeeRole.DIRECTOR)
+                        .role(String.valueOf(EmployeeRole.DIRECTOR))
                         .id("testID")
                         .department(oneDepartment)
                         .build();
@@ -94,7 +86,7 @@ class EmployeeControllerTest {
 
         RequestBuilder doRequest = MockMvcRequestBuilders
                 .post("/api/v1/employees")
-                .content(asJsonString(employeeMapper.toEmployeeDto(oneEmployee)))
+                .content(HelperTest.asJsonString(oneEmployee))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON);
 
@@ -104,13 +96,13 @@ class EmployeeControllerTest {
 
     @Test
     void createEmployeeValidationFailed() throws Exception {
-        Department oneDepartment = Department.builder()
+        DepartmentDto oneDepartment = DepartmentDto.builder()
                 .id("#department-id")
                 .build();
 
-        Employee oneEmployee = Employee.builder()
+        EmployeeDto oneEmployee = EmployeeDto.builder()
                 .email("test@mail.com")
-                .role(EmployeeRole.DIRECTOR)
+                .role(String.valueOf(EmployeeRole.DIRECTOR))
                 .id("testID")
                 .department(oneDepartment)
                 .build();
@@ -119,7 +111,7 @@ class EmployeeControllerTest {
 
         RequestBuilder doRequest = MockMvcRequestBuilders
                 .post("/api/v1/employees")
-                .content(asJsonString(employeeMapper.toEmployeeDto(oneEmployee)))
+                .content(HelperTest.asJsonString(oneEmployee))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON);
 
@@ -132,14 +124,14 @@ class EmployeeControllerTest {
 
     @Test
     void updateEmployee() throws Exception {
-        Department oneDepartment = Department.builder()
+        DepartmentDto oneDepartment = DepartmentDto.builder()
                 .id("department-id")
                 .build();
 
-        Employee oneEmployee = Employee.builder().
+        EmployeeDto oneEmployee = EmployeeDto.builder().
                 name("test")
                 .email("test@mail.com")
-                .role(EmployeeRole.DIRECTOR)
+                .role(String.valueOf(EmployeeRole.DIRECTOR))
                 .id("testID")
                 .department(oneDepartment)
                 .build();
@@ -148,7 +140,7 @@ class EmployeeControllerTest {
 
         RequestBuilder doRequest = MockMvcRequestBuilders
                 .put("/api/v1/employees/department-id")
-                .content(asJsonString(employeeMapper.toEmployeeDto(oneEmployee)))
+                .content(HelperTest.asJsonString(oneEmployee))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON);
 
