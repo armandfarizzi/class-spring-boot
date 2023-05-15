@@ -1,8 +1,11 @@
 package com.example.javaclass.exception;
 
 
+import com.example.javaclass.dto.EventDto;
+import com.example.javaclass.kafka.EventProducer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,14 +14,17 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class ControllerExceptionHandler {
+
+    @Autowired
+    private EventProducer eventProducer;
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidationErrors(MethodArgumentNotValidException ex) {
@@ -53,7 +59,16 @@ public class ControllerExceptionHandler {
         } else {
             result.put("error", e.getMessage());
         }
-
+        String errorId = UUID.randomUUID().toString();
+        result.put("error_id", errorId);
+        EventDto event = EventDto.builder()
+                .id(errorId)
+                .eventName("error exception happen!")
+                .message(e.getMessage())
+                .build();
+        try {
+            eventProducer.sendEvent(event);
+        } catch (Exception ignored) {}
         return ResponseEntity.status(code).body(result);
     }
 }
