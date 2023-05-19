@@ -1,0 +1,29 @@
+version: "3.3"
+services:
+  redis:
+    container_name: spring_vm_redis
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 20 1 --loglevel warning --requirepass authentication
+    volumes:
+      - redis:/data
+  db:
+    container_name: spring_vm_db
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: "app_employee"
+      MYSQL_USER: "employeeDB"
+      MYSQL_PASSWORD: "employee"
+      MYSQL_ROOT_PASSWORD: "password"
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+    volumes:
+      - my-db:/var/lib/mysql
+volumes:
+  my-db:
+  redis:

@@ -17,7 +17,6 @@ public class EmployeeController {
 
     @Autowired
     private EmployeeService employeeService;
-
     private EmployeeMapper employeeMapper = EmployeeMapper.INSTANCE;
 
     @GetMapping("/employees")
@@ -58,5 +57,4 @@ public class EmployeeController {
         employeeService.deleteEmployee(EmployeeDto.builder().id(id).build());
         return ResponseEntity.ok("ok");
     }
-
 }
