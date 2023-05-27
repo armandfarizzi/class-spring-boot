@@ -1,6 +1,5 @@
 package com.example.javaclass.exception;
 
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +8,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import jakarta.validation.ConstraintViolationException;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,13 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class ControllerExceptionHandler {
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintValidationErrors(ConstraintViolationException ex) {
+        List<String> errors = ex.getConstraintViolations()
+                .stream().map(er -> er.getMessage()).collect(Collectors.toList());
+        return new ResponseEntity<>(getErrorsMap(errors), new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidationErrors(MethodArgumentNotValidException ex) {
@@ -35,12 +43,14 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneralException(Exception e) {
         var code = 500;
-        var result = new HashMap<>(){{
-           put("code", 500);
-           put("message", "unexpected error, please try again later");
-        }};
+        var result = new HashMap<>() {
+            {
+                put("code", 500);
+                put("message", "unexpected error, please try again later");
+            }
+        };
 
-        if (e instanceof CustomException){
+        if (e instanceof CustomException) {
             CustomException ex = (CustomException) e;
             code = ex.getCode();
 
@@ -50,6 +60,7 @@ public class ControllerExceptionHandler {
         } else {
             result.put("error", e.getMessage());
         }
+        e.printStackTrace();
 
         return ResponseEntity.status(code).body(result);
     }

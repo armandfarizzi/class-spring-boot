@@ -1,10 +1,11 @@
 package com.example.javaclass.dto;
 
-
 import com.example.javaclass.dto.validation.ValueOfEnum;
 import com.example.javaclass.entity.EmployeeRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,20 +20,20 @@ public class EmployeeDto {
     private String id;
     @NotBlank(message = "name can not be empty")
     private String name;
+    @Email(message = "email must be in a valid format")
     @NotBlank(message = "email can not be empty")
     private String email;
     @NotBlank(message = "role can not be empty")
-    @ValueOfEnum(enumClass= EmployeeRole.class,
-            message = "role must be one " +
-                    "of 'DIRECTOR', 'MANAGER', "+
-                    "'SENIOR_STAFF', 'JUNIOR_STAFF'")
+    @ValueOfEnum(enumClass = EmployeeRole.class, message = "role must be one " +
+            "of 'DIRECTOR', 'MANAGER', " +
+            "'SENIOR_STAFF', 'JUNIOR_STAFF'")
     private String role;
 
     @JsonProperty("department_id")
     @NotBlank(message = "department_id can not be empty")
     private String departmentId;
 
-    public String getDepartmentId(){
+    public String getDepartmentId() {
         if (departmentId != null) {
             return departmentId;
         }
@@ -42,7 +43,7 @@ public class EmployeeDto {
         return null;
     }
 
-    public void setDepartmentId(String id){
+    public void setDepartmentId(String id) {
         this.departmentId = id;
     }
 

@@ -13,7 +13,6 @@ public class RedisConfig {
     @Value("${spring.redis.host}")
     private String host;
 
-
     @Value("${spring.redis.password}")
     private String password;
 
@@ -26,7 +25,6 @@ public class RedisConfig {
     @Bean
     @ConfigurationProperties("redis")
     public JedisPoolConfig jedisPoolConfig() {
-        var j = new JedisPoolConfig();
         return new JedisPoolConfig();
     }
 

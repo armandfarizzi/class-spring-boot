@@ -2,7 +2,6 @@ package com.example.javaclass.controllers;
 
 import com.example.javaclass.dto.DepartmentDto;
 import com.example.javaclass.dto.EmployeeDto;
-import com.example.javaclass.dto.mappers.EmployeeMapper;
 import com.example.javaclass.entity.EmployeeRole;
 import com.example.javaclass.services.DepartmentService;
 import com.example.javaclass.services.EmployeeService;
@@ -27,135 +26,128 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
-@WebMvcTest(controllers = {EmployeeController.class})
+@WebMvcTest(controllers = { EmployeeController.class })
 class EmployeeControllerTest {
 
-    @Autowired
-    private MockMvc mvc;
+        @Autowired
+        private MockMvc mvc;
 
-    @MockBean
-    private EmployeeService employeeService;
+        @MockBean
+        private EmployeeService employeeService;
 
-    @MockBean
-    private DepartmentService departmentService;
+        @MockBean
+        private DepartmentService departmentService;
 
-    @InjectMocks
-    private EmployeeController employeeController;
+        @InjectMocks
+        private EmployeeController employeeController;
 
-    private EmployeeMapper employeeMapper = EmployeeMapper.INSTANCE;
+        @Test
+        void getAllEmployee() throws Exception {
+                List<EmployeeDto> oneEmployee = new ArrayList<EmployeeDto>() {
+                        {
+                                add(EmployeeDto.builder().name("test")
+                                                .email("test@mail.com")
+                                                .id("testID")
+                                                .build());
+                        }
+                };
 
+                when(employeeService.getAllEmployee()).thenReturn(oneEmployee);
 
-    @Test
-    void getAllEmployee() throws Exception {
-        List<EmployeeDto> oneEmployee = new ArrayList<EmployeeDto>(){
-            {
-                add(EmployeeDto.builder().
-                        name("test")
-                            .email("test@mail.com")
-                            .id("testID")
-                            .build());
-            }
-        };
+                RequestBuilder doRequest = MockMvcRequestBuilders.get("/api/v1/employees");
+                mvc.perform(doRequest)
+                                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("test"))
+                                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value("testID"))
+                                .andExpect(MockMvcResultMatchers.jsonPath("$[0].email").value("test@mail.com"))
+                                .andExpect(status().isOk());
+        }
 
-        when(employeeService.getAllEmployee()).thenReturn(oneEmployee);
+        @Test
+        void createEmployee() throws Exception {
+                DepartmentDto oneDepartment = DepartmentDto.builder()
+                                .id("#department-id")
+                                .build();
 
-        RequestBuilder doRequest = MockMvcRequestBuilders.get("/api/v1/employees");
-        mvc.perform(doRequest)
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("test"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value("testID"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].email").value("test@mail.com"))
-                .andExpect(status().isOk());
-    }
+                EmployeeDto oneEmployee = EmployeeDto.builder().name("test")
+                                .email("test@mail.com")
+                                .role(String.valueOf(EmployeeRole.DIRECTOR))
+                                .id("testID")
+                                .department(oneDepartment)
+                                .build();
 
-    @Test
-    void createEmployee() throws Exception {
-        DepartmentDto oneDepartment = DepartmentDto.builder()
-                .id("#department-id")
-                .build();
+                when(departmentService.getDepartmentById("#department-id")).thenReturn(Optional.of(oneDepartment));
 
-        EmployeeDto oneEmployee = EmployeeDto.builder().
-                        name("test")
-                        .email("test@mail.com")
-                        .role(String.valueOf(EmployeeRole.DIRECTOR))
-                        .id("testID")
-                        .department(oneDepartment)
-                        .build();
+                RequestBuilder doRequest = MockMvcRequestBuilders
+                                .post("/api/v1/employees")
+                                .content(HelperTest.asJsonString(oneEmployee))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON);
 
-        when(departmentService.getDepartmentById("#department-id")).thenReturn(Optional.of(oneDepartment));
+                mvc.perform(doRequest)
+                                .andExpect(status().isOk());
+        }
 
-        RequestBuilder doRequest = MockMvcRequestBuilders
-                .post("/api/v1/employees")
-                .content(HelperTest.asJsonString(oneEmployee))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON);
+        @Test
+        void createEmployeeValidationFailed() throws Exception {
+                DepartmentDto oneDepartment = DepartmentDto.builder()
+                                .id("#department-id")
+                                .build();
 
-        mvc.perform(doRequest)
-                .andExpect(status().isOk());
-    }
+                EmployeeDto oneEmployee = EmployeeDto.builder()
+                                .email("test@mail.com")
+                                .role(String.valueOf(EmployeeRole.DIRECTOR))
+                                .id("testID")
+                                .department(oneDepartment)
+                                .build();
 
-    @Test
-    void createEmployeeValidationFailed() throws Exception {
-        DepartmentDto oneDepartment = DepartmentDto.builder()
-                .id("#department-id")
-                .build();
+                when(departmentService.getDepartmentById("#department-id")).thenReturn(Optional.of(oneDepartment));
 
-        EmployeeDto oneEmployee = EmployeeDto.builder()
-                .email("test@mail.com")
-                .role(String.valueOf(EmployeeRole.DIRECTOR))
-                .id("testID")
-                .department(oneDepartment)
-                .build();
+                RequestBuilder doRequest = MockMvcRequestBuilders
+                                .post("/api/v1/employees")
+                                .content(HelperTest.asJsonString(oneEmployee))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON);
 
-        when(departmentService.getDepartmentById("#department-id")).thenReturn(Optional.of(oneDepartment));
+                mvc.perform(doRequest)
+                                .andExpect(jsonPath("$.errors[0]", containsString("name can not be empty")))
+                                .andExpect(jsonPath("$.errors", hasSize(1)))
+                                .andExpect(jsonPath("$.message").value("Invalid request"))
+                                .andExpect(status().isBadRequest());
+        }
 
-        RequestBuilder doRequest = MockMvcRequestBuilders
-                .post("/api/v1/employees")
-                .content(HelperTest.asJsonString(oneEmployee))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON);
+        @Test
+        void updateEmployee() throws Exception {
+                DepartmentDto oneDepartment = DepartmentDto.builder()
+                                .id("department-id")
+                                .build();
 
-        mvc.perform(doRequest)
-                .andExpect(jsonPath("$.errors[0]", containsString("name can not be empty")))
-                .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.message").value("Invalid request"))
-                .andExpect(status().isBadRequest());
-    }
+                EmployeeDto oneEmployee = EmployeeDto.builder().name("test")
+                                .email("test@mail.com")
+                                .role(String.valueOf(EmployeeRole.DIRECTOR))
+                                .id("testID")
+                                .department(oneDepartment)
+                                .build();
 
-    @Test
-    void updateEmployee() throws Exception {
-        DepartmentDto oneDepartment = DepartmentDto.builder()
-                .id("department-id")
-                .build();
+                when(departmentService.getDepartmentById("department-id")).thenReturn(Optional.of(oneDepartment));
 
-        EmployeeDto oneEmployee = EmployeeDto.builder().
-                name("test")
-                .email("test@mail.com")
-                .role(String.valueOf(EmployeeRole.DIRECTOR))
-                .id("testID")
-                .department(oneDepartment)
-                .build();
+                RequestBuilder doRequest = MockMvcRequestBuilders
+                                .put("/api/v1/employees/department-id")
+                                .content(HelperTest.asJsonString(oneEmployee))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON);
 
-        when(departmentService.getDepartmentById("department-id")).thenReturn(Optional.of(oneDepartment));
+                mvc.perform(doRequest)
+                                .andExpect(status().isOk());
+        }
 
-        RequestBuilder doRequest = MockMvcRequestBuilders
-                .put("/api/v1/employees/department-id")
-                .content(HelperTest.asJsonString(oneEmployee))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON);
+        @Test
+        void deleteEmployee() throws Exception {
+                RequestBuilder doRequest = MockMvcRequestBuilders
+                                .delete("/api/v1/employees/department-id")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON);
 
-        mvc.perform(doRequest)
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    void deleteEmployee() throws Exception {
-        RequestBuilder doRequest = MockMvcRequestBuilders
-                .delete("/api/v1/employees/department-id")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON);
-
-        mvc.perform(doRequest)
-                .andExpect(status().isOk());
-    }
+                mvc.perform(doRequest)
+                                .andExpect(status().isOk());
+        }
 }
